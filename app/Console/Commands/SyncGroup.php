@@ -116,13 +116,16 @@ class SyncGroup extends Command
     public function syncGroup($externalEnrollment){
         $this->info('External idNumberCourse:'.$externalEnrollment->idNumberCourse.' user idnumber :'.$externalEnrollment->idNumber.' role: '.$externalEnrollment->role." idNumberGroup: ".$externalEnrollment->idNumberGroup." groupName: ".$externalEnrollment->groupName." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
 
-        if(Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})->exists()){
+        if(Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})
+        ->where('name',$externalEnrollment->{$this->extternalGroupNameField})
+        ->where('courseid',$this->course->id)
+        ->exists()){
             $this->info('Group with idnumber: '.$externalEnrollment->{$this->extternalIDNumberGroupField}.' groupname:'.$externalEnrollment->{$this->extternalGroupNameField}.' academicYearID: '.$externalEnrollment->{$this->extternalTahunAkademikField}." Exist");
             return true;
 
         }elseif(!$this->course){
             $this->msg('Course with idnumber: '.$externalEnrollment->{$this->extternalIDNumberCourseField}."doesn't Exist");
-        }else{
+        }
             $group=Group::firstOrCreate(
                 ['idnumber'=>$externalEnrollment->{$this->extternalIDNumberGroupField},'name'=>$externalEnrollment->{$this->extternalGroupNameField}],
                 ['courseid'=>$this->course->id,'descriptionformat'=>1]
@@ -133,7 +136,7 @@ class SyncGroup extends Command
                 $this->info('Grup idnumber:'.$group->idnumber.'grupname :'.$group->name.'course: '.$group->courseid."tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField}."sukses disinkron");
                 return true;
             }
-        }
+
         return false;
 
     }
