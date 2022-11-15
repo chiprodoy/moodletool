@@ -114,6 +114,7 @@ class SyncGroup extends Command
     }
 
     public function syncGroup($externalEnrollment){
+        $this->info('External idNumberCourse:'.$externalEnrollment->idNumberCourse.' user idnumber :'.$externalEnrollment->idNumber.' role: '.$externalEnrollment->role." idNumberGroup: ".$externalEnrollment->idNumberGroup." groupName".$externalEnrollment->groupName." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
 
         if(Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})->exists()){
             $this->info('Group with idnumber: '.$externalEnrollment->{$this->extternalIDNumberGroupField}.' groupname:'.$externalEnrollment->{$this->extternalGroupNameField}.' academicYearID: '.$externalEnrollment->{$this->extternalTahunAkademikField}." Exist");
@@ -128,6 +129,7 @@ class SyncGroup extends Command
             );
 
             if($group){
+
                 $this->info('Grup idnumber:'.$group->idnumber.'grupname :'.$group->name.'course: '.$group->courseid."tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField}."sukses disinkron");
                 return true;
             }
