@@ -114,7 +114,7 @@ class SyncGroup extends Command
     }
 
     public function syncGroup($externalEnrollment){
-        $this->info('External idNumberCourse:'.$externalEnrollment->idNumberCourse.' user idnumber :'.$externalEnrollment->idNumber.' role: '.$externalEnrollment->role." idNumberGroup: ".$externalEnrollment->idNumberGroup." groupName".$externalEnrollment->groupName." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
+        $this->info('External idNumberCourse:'.$externalEnrollment->idNumberCourse.' user idnumber :'.$externalEnrollment->idNumber.' role: '.$externalEnrollment->role." idNumberGroup: ".$externalEnrollment->idNumberGroup." groupName: ".$externalEnrollment->groupName." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
 
         if(Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})->exists()){
             $this->info('Group with idnumber: '.$externalEnrollment->{$this->extternalIDNumberGroupField}.' groupname:'.$externalEnrollment->{$this->extternalGroupNameField}.' academicYearID: '.$externalEnrollment->{$this->extternalTahunAkademikField}." Exist");
@@ -148,7 +148,7 @@ class SyncGroup extends Command
         }else{
             $user->groups()->sync($group->id);
             $userGroup=$user->groups()->where('groupid',$group->id);
-            if($userGroup) $this->info('User username:'.$user->username.'useridnumber:'.$user->idnumber.'berhasil ditambahkan ke grup grupidnumber:'.$group->idnumber.'grupname :'.$group->name.'course: '.$group->courseid."tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
+            if($userGroup) $this->info('User username:'.$user->username.'useridnumber:'.$user->idnumber.'berhasil ditambahkan ke grup id:'.$group->id.' grupidnumber: '.$group->idnumber.' grupname :'.$group->name.' course: '.$group->courseid." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
             else $this->msg('User username:'.$user->username.'useridnumber:'.$user->idnumber.'gagal ditambahkan ke grup grupidnumber:'.$group->idnumber.'grupname :'.$group->name.'course: '.$group->courseid."tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
         }
     }
