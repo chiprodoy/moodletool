@@ -96,8 +96,8 @@ class SyncGroup extends Command
     public function setSourceData(){
         $res=DB::connection('source_sqlsrv')
         ->table('MoodleEnrollment3')
-        ->where('academicYearID',$this->academicYearID)
-        ->where('role',5);
+        ->where('academicYearID',$this->academicYearID);
+        //->where('role',5)
         /**
          * jika onject course ada atau option --a
          **/
