@@ -126,7 +126,7 @@ class SyncGroup extends Command
         }elseif(!$this->course){
             $this->msg('Course with idnumber: '.$externalEnrollment->{$this->extternalIDNumberCourseField}."doesn't Exist");
         }
-            $group=Group::firstOrCreate(
+            $group=Group::updateOrCreate(
                 ['idnumber'=>$externalEnrollment->{$this->extternalIDNumberGroupField},'name'=>$externalEnrollment->{$this->extternalGroupNameField}],
                 ['courseid'=>$this->course->id,'descriptionformat'=>1]
             );
