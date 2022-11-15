@@ -102,6 +102,7 @@ class SyncGroup extends Command
          * jika onject course ada atau option --a
          **/
         if($this->course){
+            $this->info('Course id: '.$this->course->id.' idnumber: '.$this->course->idnumber." fullname: ".$this->course->fullname." shortname:".$this->course->shortname,'v');
             $res->where('idNumberCourse',$this->course->idnumber);
         }
 
