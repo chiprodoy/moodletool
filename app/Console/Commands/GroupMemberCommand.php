@@ -68,7 +68,7 @@ class GroupMemberCommand extends Command
             $this->user=User::where('idnumber',$this->argument('useridnumber'))->first();
             if(!$this->user) $this->error('user not found: idnumber '.$this->argument('useridnumber'),'v');
         }
-        $this->info($this->user);
+        $this->info($this->user,'v');
 
     }
 
@@ -76,7 +76,7 @@ class GroupMemberCommand extends Command
         $this->course=Course::where('idnumber',$this->argument('courseidnumber'))->first();
             if(!$this->course) $this->error('Course not found: '.$this->argument('courseidnumber'),'v');
 
-        $this->info($this->course);
+        $this->info($this->course,'v');
 
     }
 
@@ -85,7 +85,7 @@ class GroupMemberCommand extends Command
                         ->where('name',$this->argument('groupname'))->first();
             if(!$this->group) $this->error('Group not found: '.$this->argument('groupname').", courseid:".$this->course->id,'v');
 
-        $this->info($this->group);
+        $this->info($this->group,'v');
 
     }
     private function store(){
