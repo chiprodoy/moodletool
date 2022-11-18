@@ -68,12 +68,15 @@ class GroupMemberCommand extends Command
             $this->user=User::where('idnumber',$this->argument('useridnumber'))->first();
             if(!$this->user) $this->error('user not found: idnumber '.$this->argument('useridnumber'),'v');
         }
+        $this->info($this->user);
 
     }
 
     private function searchCourse(){
         $this->course=Course::where('idnumber',$this->argument('courseidnumber'))->first();
             if(!$this->course) $this->error('Course not found: '.$this->argument('courseidnumber'),'v');
+
+        $this->info($this->course);
 
     }
 
@@ -82,14 +85,27 @@ class GroupMemberCommand extends Command
                         ->where('name',$this->argument('groupname'))->first();
             if(!$this->group) $this->error('Group not found: '.$this->argument('groupname').", courseid:".$this->course->id,'v');
 
+        $this->info($this->group);
+
     }
     private function store(){
         $this->searchUser();
         $this->searchCourse();
         $this->searchGroup();
-        $this->user->groups()->sync($this->group->id);
-
+        return;
+        if($this->user && $this->group){
+             $this->user->groups()->sync($this->group->id);
+             $data=$this->user->groups()->get();
+             if($data->name==$this->argument('groupname') && $data->courseid==$this->course->id){
+                $this->line("sukses sinkron",'v');
+                $this->info($data,'v');
+                return true;
+             }
+        }
+        $this->error('gagal sinkron: ');
+        return false;
     }
+
     private function show(){
         $this->searchUser();
         $this->searchCourse();
