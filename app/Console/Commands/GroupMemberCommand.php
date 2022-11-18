@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Validation\Rules\Exists;
 
 class GroupMemberCommand extends Command
 {
@@ -56,6 +57,8 @@ class GroupMemberCommand extends Command
     {
         switch($this->argument('action')){
             case "check" : $this->show();break;
+            case "create" : $this->store();break;
+
         }
         return 0;
     }
@@ -68,15 +71,14 @@ class GroupMemberCommand extends Command
             $this->user=User::where('idnumber',$this->argument('useridnumber'))->first();
             if(!$this->user) $this->error('user not found: idnumber '.$this->argument('useridnumber'),'v');
         }
-        $this->info($this->user,'v');
-
+        $this->info("============".$this->user,'v');
     }
 
     private function searchCourse(){
         $this->course=Course::where('idnumber',$this->argument('courseidnumber'))->first();
             if(!$this->course) $this->error('Course not found: '.$this->argument('courseidnumber'),'v');
 
-        $this->info($this->course,'v');
+        $this->info("============".$this->course,'v');
 
     }
 
@@ -85,20 +87,22 @@ class GroupMemberCommand extends Command
                         ->where('name',$this->argument('groupname'))->first();
             if(!$this->group) $this->error('Group not found: '.$this->argument('groupname').", courseid:".$this->course->id,'v');
 
-        $this->info($this->group,'v');
+        $this->info("=============".$this->group,'v');
 
     }
     private function store(){
         $this->searchUser();
         $this->searchCourse();
         $this->searchGroup();
-        return;
         if($this->user && $this->group){
              $this->user->groups()->sync($this->group->id);
-             $data=$this->user->groups()->get();
-             if($data->name==$this->argument('groupname') && $data->courseid==$this->course->id){
-                $this->line("sukses sinkron",'v');
-                $this->info($data,'v');
+             $data=$this->user->groups()
+             ->where('groupid',$this->group->id)
+             ->where('name',$this->argument('groupname'));
+
+             if($data->exists()){
+                $this->info("sukses sinkron");
+                $this->info($data->get(),'v');
                 return true;
              }
         }
@@ -110,8 +114,13 @@ class GroupMemberCommand extends Command
         $this->searchUser();
         $this->searchCourse();
         $this->searchGroup();
-        $data=$this->user->groups()->get();
-        $this->info($data);
+        $data=$this->user->groups()
+                ->where('groupid',$this->group->id)
+                ->where('name',$this->argument('groupname'));
+
+        $this->info($data->get(),'v');
+        if($data->exists()) $this->info('data ditemukan');
+        else $this->warn('data tidak ditemukan');
     }
 
 
