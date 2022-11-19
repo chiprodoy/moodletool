@@ -6,7 +6,6 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 class SyncGroup extends Command
@@ -23,25 +22,21 @@ class SyncGroup extends Command
     public $course;
     public $message=[];
 
-    public $paramCourseIDNumber;
-    public $paramCourseShortName;
-    public $paramAcademicYearID;
-    public $paramGroupName;
-    public $paramUserIDNumber;
-    public $paramVerbose;
+    public $courseIDNumber;
+    public $courseShortName;
+    public $academicYearID;
+    public $groupName;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'moodle:syncgroup
+    protected $signature = 'sync:group
                                 {academicYearID : id tahun akademik}
                                 {groupName? : nama grup atau kelas optional}
                                 {--courseIDNumber= : id number course}
                                 {--shortname= : label pada course }
-                                {--useridnumber= : userid number }
-
                                 {--a|all}';
 
     /**
@@ -69,43 +64,23 @@ class SyncGroup extends Command
      */
     public function handle()
     {
-        $this->paramAcademicYearID=$this->argument('academicYearID');
-        $this->paramCourseIDNumber=$this->option('courseIDNumber');
-        $this->paramGroupName=$this->argument('groupName');
-        $this->paramCourseShortName=$this->option('shortname');
-        $this->paramUserIDNumber=$this->option('useridnumber');
-        $this->paramVerbose=$this->option('verbose');
-        //$this->setCourse();
+        $this->academicYearID=$this->argument('academicYearID');
+        $this->courseIDNumber=$this->option('courseIDNumber');
+        $this->groupName=$this->argument('groupName');
+        $this->courseShortName=$this->option('shortname');
 
+        $this->setCourse();
         $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
-            if($this->paramVerbose){
-                $param=[
-                    'action' => 'create',
-                    'groupname'=>$srcData->groupName,
-                    'courseidnumber'=>$srcData->idNumberCourse,
-                    '--uidn'=>$srcData->idNumber,
-                    '-v'=>true,
-                ];
-            }else{
-                $param=[
-                    'action' => 'create',
-                    'groupname'=>$srcData->groupName,
-                    'courseidnumber'=>$srcData->idNumberCourse,
-                    '--uidn'=>$srcData->idNumber,
-                ];
+            $this->courseIDNumber=$srcData->{$this->extternalIDNumberCourseField};
+            $this->setCourse();
+
+            if($this->syncGroup($srcData)){
+                 $this->syncGroupMember($srcData);
             }
-
-            $this->call('moodle:groupmember',$param);
-           // $this->courseIDNumber=$srcData->{$this->extternalIDNumberCourseField};
-            //$this->setCourse();
-
-           // if($this->syncGroup($srcData)){
-            //     $this->syncGroupMember($srcData);
-           // }
         });
-       // $this->showMessage();
-       // $this->runMoodleCommand($this->clearCacheCommand);
-       // $this->info('Command finish');
+        $this->showMessage();
+        $this->runMoodleCommand($this->clearCacheCommand);
+        $this->info('Command finish');
 
         return Command::SUCCESS;
     }
@@ -121,24 +96,20 @@ class SyncGroup extends Command
     public function setSourceData(){
         $res=DB::connection('source_sqlsrv')
         ->table('MoodleEnrollment3')
-        ->where('academicYearID',$this->paramAcademicYearID)
-        ->where('role',5);
+        ->where('academicYearID',$this->academicYearID);
+        //->where('role',5)
         /**
          * jika onject course ada atau option --a
          **/
-        if(!empty($this->paramCourseIDNumber)){
-            $res->where('idNumberCourse',$this->paramCourseIDNumber);
+        if($this->course){
+            $this->info('Course id: '.$this->course->id.' idnumber: '.$this->course->idnumber." fullname: ".$this->course->fullname." shortname:".$this->course->shortname,'v');
+            $res->where('idNumberCourse',$this->course->idnumber);
         }
 
-        if(!empty($this->paramGroupName)){
-            $res->where('groupName',$this->paramGroupName);
+        if(!empty($this->groupName)){
+            $res->where('groupName',$this->groupName);
         }
 
-        if(!empty($this->paramUserIDNumber)){
-            $res->where('idNumber',$this->paramUserIDNumber);
-        }
-
-        $this->info($res->get(),'v');
         return $res->get();
     }
 

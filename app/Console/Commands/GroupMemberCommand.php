@@ -15,6 +15,8 @@ class GroupMemberCommand extends Command
     private $course;
     private $user;
 
+    public $paramUserName;
+    public $paramUserIDNumber;
 
     /**
      * The name and signature of the console command.
@@ -25,10 +27,8 @@ class GroupMemberCommand extends Command
                                 {action : create to add member, check to read}
                                 {groupname}
                                 {courseidnumber}
-                                {--u}
-                                {username?}
-                                {--uid}
-                                {useridnumber?}';
+                                {--u=}
+                                {--uidn=}';
 
     /**
      * The console command description.
@@ -55,6 +55,11 @@ class GroupMemberCommand extends Command
      */
     public function handle()
     {
+        $this->paramUserIDNumber=$this->option('uidn');
+        $this->paramUserName=$this->option('u');
+        $this->paramCourseIDNumber=$this->argument('courseidnumber');
+        $this->paramGroupName=$this->argument('groupname');
+
         switch($this->argument('action')){
             case "check" : $this->show();break;
             case "create" : $this->store();break;
@@ -64,19 +69,19 @@ class GroupMemberCommand extends Command
     }
 
     private function searchUser(){
-        if(!empty($this->argument('username'))){
-            $this->user=User::where('username',$this->argument('username'))->first();
-            if(!$this->user) $this->error('user not found: username '.$this->argument('username'),'v');
+        if(!empty($this->paramUserName)){
+            $this->user=User::where('username',$this->paramUserName)->first();
+            if(!$this->user) $this->error('user not found: username '.$this->paramUserName,'v');
         }else{
-            $this->user=User::where('idnumber',$this->argument('useridnumber'))->first();
-            if(!$this->user) $this->error('user not found: idnumber '.$this->argument('useridnumber'),'v');
+            $this->user=User::where('idnumber',$this->paramUserIDNumber)->first();
+            if(!$this->user) $this->error('user not found: idnumber '.$this->paramUserIDNumber,'v');
         }
         $this->info("============".$this->user,'v');
     }
 
     private function searchCourse(){
-        $this->course=Course::where('idnumber',$this->argument('courseidnumber'))->first();
-            if(!$this->course) $this->error('Course not found: '.$this->argument('courseidnumber'),'v');
+        $this->course=Course::where('idnumber',$this->paramCourseIDNumber)->first();
+            if(!$this->course) $this->error('Course not found: '.$this->paramCourseIDNumber,'v');
 
         $this->info("============".$this->course,'v');
 
@@ -84,8 +89,8 @@ class GroupMemberCommand extends Command
 
     private function searchGroup(){
         $this->group=Group::where('courseid',$this->course->id)
-                        ->where('name',$this->argument('groupname'))->first();
-            if(!$this->group) $this->error('Group not found: '.$this->argument('groupname').", courseid:".$this->course->id,'v');
+                        ->where('name',$this->paramGroupName)->first();
+            if(!$this->group) $this->error('Group not found: '.$this->paramGroupName.", courseid:".$this->course->id,'v');
 
         $this->info("=============".$this->group,'v');
 
@@ -98,7 +103,7 @@ class GroupMemberCommand extends Command
              $this->user->groups()->sync($this->group->id);
              $data=$this->user->groups()
              ->where('groupid',$this->group->id)
-             ->where('name',$this->argument('groupname'));
+             ->where('name',$this->paramGroupName);
 
              if($data->exists()){
                 $this->info("sukses sinkron");
@@ -116,7 +121,7 @@ class GroupMemberCommand extends Command
         $this->searchGroup();
         $data=$this->user->groups()
                 ->where('groupid',$this->group->id)
-                ->where('name',$this->argument('groupname'));
+                ->where('name',$this->paramGroupName);
 
         $this->info($data->get(),'v');
         if($data->exists()) $this->info('data ditemukan');
