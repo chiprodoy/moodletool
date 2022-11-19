@@ -29,6 +29,7 @@ class SyncGroup extends Command
     public $paramGroupName;
     public $paramUserIDNumber;
     public $paramVerbose;
+    public $paramAction;
 
     /**
      * The name and signature of the console command.
@@ -36,6 +37,7 @@ class SyncGroup extends Command
      * @var string
      */
     protected $signature = 'moodle:syncgroup
+                                {action : action check or create}
                                 {academicYearID : id tahun akademik}
                                 {groupName? : nama grup atau kelas optional}
                                 {--courseIDNumber= : id number course}
@@ -75,12 +77,13 @@ class SyncGroup extends Command
         $this->paramCourseShortName=$this->option('shortname');
         $this->paramUserIDNumber=$this->option('useridnumber');
         $this->paramVerbose=$this->option('verbose');
+        $this->paramAction=$this->argument('action');
         //$this->setCourse();
 
         $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
             if($this->paramVerbose){
                 $param=[
-                    'action' => 'create',
+                    'action' => $this->paramAction,
                     'groupname'=>$srcData->groupName,
                     'courseidnumber'=>$srcData->idNumberCourse,
                     '--uidn'=>$srcData->idNumber,
@@ -88,7 +91,7 @@ class SyncGroup extends Command
                 ];
             }else{
                 $param=[
-                    'action' => 'create',
+                    'action' => $this->paramAction,
                     'groupname'=>$srcData->groupName,
                     'courseidnumber'=>$srcData->idNumberCourse,
                     '--uidn'=>$srcData->idNumber,
