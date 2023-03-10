@@ -58,7 +58,6 @@ class CreateGroup extends Command
         $this->paramAction=$this->argument('action');
 
         $this->setCourse();
-        exit();
         if($this->paramAction=='create'){
             $this->store();
         }else{
@@ -72,12 +71,11 @@ class CreateGroup extends Command
     }
     private function setCourse(){
         $this->course=Course::where('idnumber',$this->paramCourseIDNumber)->first();
-        dd($this->course);
         $this->info('found course : name :'.$this->course->fullname.'shortname:'.$this->course->shortname.''.'idnumber:'.$this->course->idnumber,'v');
 
     }
     public function store(){
-        $group=Group::updateOrCreate(
+        Group::updateOrCreate(
             [
                 'idnumber'=>$this->paramGroupIDNumber,
                 'name'=>$this->paramGroupName,
@@ -85,6 +83,15 @@ class CreateGroup extends Command
             ],
             ['descriptionformat'=>1]
         );
+        $group=Group::where('idnumber',$this->paramGroupIDNumber)->first();
+
+        if($group->course->idnumber==$this->paramCourseIDNumber){
+            $this->info('create group success : groupname :'.$group->name.'idnumber:'.$group->idnumber.''.'on course: '.$group->course->idnumber.' coursename:'.$group->course->fullname.' shortname:'.$group->course->shortname,'v');
+            return true;
+        }else{
+            $this->error('create group failed : groupname :'.$this->paramGroupName.'grupidnumber:'.$this->paramGroupIDNumber.''.'on course: '.$this->course->idnumber.' coursename:'.$this->course->fullname.' shortname:'.$this->course->shortname,'v');
+            return false;
+        }
     }
 
     private function searchCourse(){

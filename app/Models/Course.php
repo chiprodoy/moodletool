@@ -10,4 +10,8 @@ class Course extends Model
     use HasFactory;
 
     protected $table='course';
+
+    public function groups(){
+        return $this->hasMany(Group::class,'courseid');
+    }
 }

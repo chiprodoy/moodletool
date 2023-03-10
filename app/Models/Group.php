@@ -32,7 +32,9 @@ class Group extends Model
         return $this->belongsToMany(User::class,'groups_members','groupid','userid');
     }
 
-
+    public function course(){
+        return $this->belongsTo(Course::class,'courseid');
+    }
 
 
 }
