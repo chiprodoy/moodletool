@@ -16,7 +16,7 @@ class Group extends Model
     public $timestamps = false;
 
     protected $fillable=['courseid','idnumber','name','description',
-                            'descriptionformat'];
+                            'descriptionformat','timecreated','timemodified'];
                             //'timecreated','timemodified'];
 
     protected $casts=[

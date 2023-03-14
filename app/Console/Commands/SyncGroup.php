@@ -83,7 +83,28 @@ class SyncGroup extends Command
                 'groupName'=>$groupName
             ];
         }
-        $this->call('moodle:group',$groupParam);
+       return $this->call('moodle:group',$groupParam);
+    }
+
+    public function syncGroupMember($idNumberCourse,$userIDNumber,$groupName){
+
+        if($this->paramVerbose){
+            $groupParam=[
+                'action'=>'create',
+                'groupname'=>$groupName,
+                'courseidnumber'=>$idNumberCourse,
+                '--uidn'=>$userIDNumber,
+                '-v'=>true,
+            ];
+        }else{
+            $groupParam=[
+                'action'=>'create',
+                'groupname'=>$groupName,
+                'courseidnumber'=>$idNumberCourse,
+                '--uidn'=>$userIDNumber
+            ];
+        }
+       return $this->call('moodle:groupmember',$groupParam);
     }
     /**
      * Execute the console command.
@@ -99,7 +120,10 @@ class SyncGroup extends Command
         }
 
         $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
-            $this->syncGroup($srcData->idNumberCourse,$srcData->idNumberGroup,$srcData->groupName);
+           // if($srcData->idNumberCourse=='20222-12203-31-0'){
+                $this->syncGroup($srcData->idNumberCourse,$srcData->idNumberGroup,$srcData->groupName);
+                $this->syncGroupMember($srcData->idNumberCourse,$srcData->idNumber,$srcData->groupName);
+           // }
         });
         // $this->paramCourseIDNumber=$this->option('courseIDNumber');
         // $this->paramGroupName=$this->argument('groupName');
@@ -202,7 +226,7 @@ class SyncGroup extends Command
 
     }
 **/
-    public function syncGroupMember($externalEnrollment){
+/*     public function syncGroupMember($externalEnrollment){
         $user=User::where('idnumber',$externalEnrollment->{$this->extternalIDNumberUserField})->first();
         $group=Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})->first();
         if(!$user){
@@ -216,7 +240,7 @@ class SyncGroup extends Command
             else $this->msg('User username:'.$user->username.'useridnumber:'.$user->idnumber.'gagal ditambahkan ke grup grupidnumber:'.$group->idnumber.'grupname :'.$group->name.'course: '.$group->courseid."tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
         }
     }
-
+ */
     public function info($string, $verbosity = null)
     {
         parent::info($string,'v');

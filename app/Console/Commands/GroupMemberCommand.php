@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Validation\Rules\Exists;
 
@@ -17,7 +18,8 @@ class GroupMemberCommand extends Command
 
     public $paramUserName;
     public $paramUserIDNumber;
-
+    public $paramCourseIDNumber;
+    public $paramGroupName;
     /**
      * The name and signature of the console command.
      *
@@ -65,7 +67,7 @@ class GroupMemberCommand extends Command
             case "create" : $this->store();break;
 
         }
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function searchUser(){
@@ -88,19 +90,28 @@ class GroupMemberCommand extends Command
     }
 
     private function searchGroup(){
-        $this->group=Group::where('courseid',$this->course->id)
-                        ->where('name',$this->paramGroupName)->first();
-            if(!$this->group) $this->error('Group not found: '.$this->paramGroupName.", courseid:".$this->course->id,'v');
+        if($this->course){
+            $this->group=Group::where('courseid',$this->course->id)
+                            ->where('name',$this->paramGroupName)->first();
+                if(!$this->group) $this->error('Group not found: '.$this->paramGroupName.", courseid:".$this->course->id,'v');
 
-        $this->info("=============".$this->group,'v');
-
+            $this->info("=============".$this->group,'v');
+        }
     }
     private function store(){
         $this->searchUser();
         $this->searchCourse();
         $this->searchGroup();
         if($this->user && $this->group){
-             $this->user->groups()->sync($this->group->id);
+            // Detach all grup from the user...
+             //$this->user->groups()->detach();
+             $preData=$this->user->groups()
+             ->where('groupid',$this->group->id);
+             $this->info($preData->get());
+             if($preData->doesntExist()){
+                $this->user->groups()->attach($this->group->id,['timeadded'=>Carbon::now()->timestamp]);
+             }
+
              $data=$this->user->groups()
              ->where('groupid',$this->group->id)
              ->where('name',$this->paramGroupName);

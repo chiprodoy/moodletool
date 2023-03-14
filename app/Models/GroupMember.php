@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class GroupMember extends Model
 {
     use HasFactory;
-    protected $fillable=['groupid','userid'];
+    protected $fillable=['groupid','userid','timeadded'];
 
     public $timestamps = false;
 
