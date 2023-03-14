@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Course;
 use App\Models\Group;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class CreateGroup extends Command
@@ -59,10 +60,15 @@ class CreateGroup extends Command
 
         $this->setCourse();
         if($this->paramAction=='create'){
-            $this->store();
+            // jika course ditemukan
+            if($this->course) $this->store();
+            else  return Command::FAILURE;
+
         }else{
             $this->show();
         }
+        return Command::SUCCESS;
+
     }
 
     public function show(){
@@ -71,18 +77,33 @@ class CreateGroup extends Command
     }
     private function setCourse(){
         $this->course=Course::where('idnumber',$this->paramCourseIDNumber)->first();
-        $this->info('found course : name :'.$this->course->fullname.'shortname:'.$this->course->shortname.''.'idnumber:'.$this->course->idnumber,'v');
+        if($this->course)
+            $this->info('found course : name :'.$this->course->fullname.'shortname:'.$this->course->shortname.''.'idnumber:'.$this->course->idnumber,'v');
+        else
+            $this->error('course not found : '.$this->paramCourseIDNumber,'v');
 
     }
     public function store(){
-        Group::updateOrCreate(
-            [
+        $group=Group::where('idnumber',$this->paramGroupIDNumber);
+        if($group->exists()){
+            $group->update([
                 'idnumber'=>$this->paramGroupIDNumber,
                 'name'=>$this->paramGroupName,
-                'courseid'=>$this->course->id
-            ],
-            ['descriptionformat'=>1]
-        );
+                'courseid'=>$this->course->id,
+                'descriptionformat'=>1,
+                'timemodified'=>Carbon::now()->timestamp
+            ]);
+        }else{
+            Group::create([
+                'idnumber'=>$this->paramGroupIDNumber,
+                'name'=>$this->paramGroupName,
+                'courseid'=>$this->course->id,
+                'descriptionformat'=>1,
+                'timecreated'=>Carbon::now()->timestamp
+            ]);
+        }
+
+
         $group=Group::where('idnumber',$this->paramGroupIDNumber)->first();
 
         if($group->course->idnumber==$this->paramCourseIDNumber){
@@ -92,13 +113,5 @@ class CreateGroup extends Command
             $this->error('create group failed : groupname :'.$this->paramGroupName.'grupidnumber:'.$this->paramGroupIDNumber.''.'on course: '.$this->course->idnumber.' coursename:'.$this->course->fullname.' shortname:'.$this->course->shortname,'v');
             return false;
         }
-    }
-
-    private function searchCourse(){
-        $this->course=Course::where('idnumber',$this->paramCourseIDNumber)->first();
-            if(!$this->course) $this->error('Course not found: '.$this->paramCourseIDNumber,'v');
-
-        $this->info("============".$this->course,'v');
-
     }
 }

@@ -12,6 +12,7 @@ return [
     ],
     'clear_cache'=>[
         'executeable_path'=>env('CLEAR_CACHE_EXECUTEABLE_PATH')
-    ]
+    ],
+    'tahun_akademik'=>env('MOODLE_TAHUN_AKADEMIK'),
 
 ];

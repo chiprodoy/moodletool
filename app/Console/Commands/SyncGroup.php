@@ -38,7 +38,7 @@ class SyncGroup extends Command
      */
     protected $signature = 'moodle:syncgroup
                                 {action : action check or create}
-                                {academicYearID : id tahun akademik}
+                                {academicYearID? : id tahun akademik}
                                 {groupName? : nama grup atau kelas optional}
                                 {--courseIDNumber= : id number course}
                                 {--shortname= : label pada course }
@@ -64,6 +64,27 @@ class SyncGroup extends Command
 
         parent::__construct();
     }
+
+    public function syncGroup($idNumberCourse,$groupIDNumber,$groupName){
+
+        if($this->paramVerbose){
+            $groupParam=[
+                'action'=>'create',
+                'courseIDNumber'=>$idNumberCourse,
+                'groupIDNumber'=>$groupIDNumber,
+                'groupName'=>$groupName,
+                '-v'=>true,
+            ];
+        }else{
+            $groupParam=[
+                'action'=>'create',
+                'courseIDNumber'=>$idNumberCourse,
+                'groupIDNumber'=>$groupIDNumber,
+                'groupName'=>$groupName
+            ];
+        }
+        $this->call('moodle:group',$groupParam);
+    }
     /**
      * Execute the console command.
      *
@@ -71,41 +92,49 @@ class SyncGroup extends Command
      */
     public function handle()
     {
-        $this->paramAcademicYearID=$this->argument('academicYearID');
-        $this->paramCourseIDNumber=$this->option('courseIDNumber');
-        $this->paramGroupName=$this->argument('groupName');
-        $this->paramCourseShortName=$this->option('shortname');
-        $this->paramUserIDNumber=$this->option('useridnumber');
-        $this->paramVerbose=$this->option('verbose');
-        $this->paramAction=$this->argument('action');
-        //$this->setCourse();
+        if(empty($this->argument('academicYearID'))){
+            $this->paramAcademicYearID=config('moodle.tahun_akademik');
+        }else{
+            $this->paramAcademicYearID=$this->argument('academicYearID');
+        }
 
         $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
-            if($this->paramVerbose){
-                $param=[
-                    'action' => $this->paramAction,
-                    'groupname'=>$srcData->groupName,
-                    'courseidnumber'=>$srcData->idNumberCourse,
-                    '--uidn'=>$srcData->idNumber,
-                    '-v'=>true,
-                ];
-            }else{
-                $param=[
-                    'action' => $this->paramAction,
-                    'groupname'=>$srcData->groupName,
-                    'courseidnumber'=>$srcData->idNumberCourse,
-                    '--uidn'=>$srcData->idNumber,
-                ];
-            }
+            $this->syncGroup($srcData->idNumberCourse,$srcData->idNumberGroup,$srcData->groupName);
+        });
+        // $this->paramCourseIDNumber=$this->option('courseIDNumber');
+        // $this->paramGroupName=$this->argument('groupName');
+        // $this->paramCourseShortName=$this->option('shortname');
+        // $this->paramUserIDNumber=$this->option('useridnumber');
+        // $this->paramVerbose=$this->option('verbose');
+        // $this->paramAction=$this->argument('action');
+        // //$this->setCourse();
 
-            $this->call('moodle:groupmember',$param);
+        // $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
+        //     if($this->paramVerbose){
+        //         $param=[
+        //             'action' => $this->paramAction,
+        //             'groupname'=>$srcData->groupName,
+        //             'courseidnumber'=>$srcData->idNumberCourse,
+        //             '--uidn'=>$srcData->idNumber,
+        //             '-v'=>true,
+        //         ];
+        //     }else{
+        //         $param=[
+        //             'action' => $this->paramAction,
+        //             'groupname'=>$srcData->groupName,
+        //             'courseidnumber'=>$srcData->idNumberCourse,
+        //             '--uidn'=>$srcData->idNumber,
+        //         ];
+        //     }
+
+        //     $this->call('moodle:groupmember',$param);
            // $this->courseIDNumber=$srcData->{$this->extternalIDNumberCourseField};
             //$this->setCourse();
 
            // if($this->syncGroup($srcData)){
             //     $this->syncGroupMember($srcData);
            // }
-        });
+       // });
        // $this->showMessage();
        // $this->runMoodleCommand($this->clearCacheCommand);
        // $this->info('Command finish');
@@ -124,8 +153,8 @@ class SyncGroup extends Command
     public function setSourceData(){
         $res=DB::connection('source_sqlsrv')
         ->table('MoodleEnrollment3')
-        ->where('academicYearID',$this->paramAcademicYearID)
-        ->where('role',5);
+        ->where('academicYearID',$this->paramAcademicYearID);
+
         /**
          * jika onject course ada atau option --a
          **/
@@ -144,7 +173,7 @@ class SyncGroup extends Command
         $this->info($res->get(),'v');
         return $res->get();
     }
-
+/**
     public function syncGroup($externalEnrollment){
         $this->info('External idNumberCourse:'.$externalEnrollment->idNumberCourse.' user idnumber :'.$externalEnrollment->idNumber.' role: '.$externalEnrollment->role." idNumberGroup: ".$externalEnrollment->idNumberGroup." groupName: ".$externalEnrollment->groupName." tahun: ".$externalEnrollment->{$this->extternalTahunAkademikField});
 
@@ -172,7 +201,7 @@ class SyncGroup extends Command
         return false;
 
     }
-
+**/
     public function syncGroupMember($externalEnrollment){
         $user=User::where('idnumber',$externalEnrollment->{$this->extternalIDNumberUserField})->first();
         $group=Group::where('idnumber',$externalEnrollment->{$this->extternalIDNumberGroupField})->first();
