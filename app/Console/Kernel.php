@@ -15,6 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('moodle:syncgroup create')
+                ->everySixHours()->withoutOverlapping()
+                ->emailOutputOnFailure('syazili@binadarma.ac.id');
         // $schedule->command('inspire')->hourly();
     }
 
