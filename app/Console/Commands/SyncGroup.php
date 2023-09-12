@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SyncGroup extends Command
 {
@@ -162,7 +163,7 @@ class SyncGroup extends Command
        // $this->showMessage();
        // $this->runMoodleCommand($this->clearCacheCommand);
        // $this->info('Command finish');
-
+        Log::info('Sync Group Running');
         return Command::SUCCESS;
     }
 
