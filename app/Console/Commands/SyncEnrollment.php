@@ -49,7 +49,8 @@ class SyncEnrollment extends Command
 
         $this->smt=substr($this->tahunAkademik,strlen($this->tahunAkademik)-1,1);
 
-        $this->getTahunAkademik($this->tahun,$this->smt);
+        $academicYearID=$this->getTahunAkademik($this->tahun,$this->smt);
+
         return 0;
     }
 
