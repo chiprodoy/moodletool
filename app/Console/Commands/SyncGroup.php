@@ -64,6 +64,7 @@ class SyncGroup extends Command
         $this->clearCacheCommand=config('moodle.clear_cache.executeable_path');
 
         parent::__construct();
+
     }
 
     public function syncGroup($idNumberCourse,$groupIDNumber,$groupName){
@@ -119,6 +120,7 @@ class SyncGroup extends Command
         }else{
             $this->paramAcademicYearID=$this->argument('academicYearID');
         }
+        $this->paramUserIDNumber=$this->option('useridnumber');
 
         $srcData=$this->withProgressBar($this->setSourceData(),function($srcData){
            // if($srcData->idNumberCourse=='20222-12203-31-0'){
@@ -129,7 +131,6 @@ class SyncGroup extends Command
         // $this->paramCourseIDNumber=$this->option('courseIDNumber');
         // $this->paramGroupName=$this->argument('groupName');
         // $this->paramCourseShortName=$this->option('shortname');
-        // $this->paramUserIDNumber=$this->option('useridnumber');
         // $this->paramVerbose=$this->option('verbose');
         // $this->paramAction=$this->argument('action');
         // //$this->setCourse();
@@ -194,7 +195,6 @@ class SyncGroup extends Command
         if(!empty($this->paramUserIDNumber)){
             $res->where('idNumber',$this->paramUserIDNumber);
         }
-
         $this->info($res->get(),'v');
         return $res->get();
     }
